@@ -1,12 +1,25 @@
 {
-  "name": "stream",
+  "name": "damien",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Daemonize Node application with child processes",
+  "bin": "./bin/damien",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "watch",
+    "node",
+    "deamon"
+  ],
+  "author": "Manuel Spagnolo <spagnolo.manu@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^6.7.2",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
 }
