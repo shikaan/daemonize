@@ -1,0 +1,63 @@
+#!/usr/bin/node
+
+const childProcess = require("child_process");
+const readline = require("readline");
+const fs = require("fs");
+
+const {debounce} = require('./debounce');
+
+const rdl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+});
+
+const hasHelp = process.argv.find(i => ["-h", "--help"].includes(i));
+
+if (hasHelp) {
+  console.log(
+    `
+    Usage: daemonize [NODE_JS_FILE]
+    Relaunches NODE_JS_FILE on file changes.
+  `.trim()
+  );
+  process.exit(0);
+}
+
+const [_node, _daemonize, filename, ...rest] = process.argv;
+
+function launchSubprocess() {
+  process.stdout.write('\033c');
+  process.stdin.removeAllListeners("keypress");
+  const cp = childProcess.fork(filename, rest, { silent: false });
+
+  let fileWatcher;
+  const debouncedListener = debounce((event, filename) => {
+    if (event === "change" && filename) {
+      fileWatcher.close();
+      launchSubprocess();
+    }
+  }, 2000)
+  fileWatcher = fs.watch(__dirname, debouncedListener);
+
+  cp.on("exit", (code, signal) => {
+    if (code === 0) {
+      console.log("> Clean exit");
+      console.log("> Enter 'rs' to restart");
+      
+      rdl.removeAllListeners('line');
+      rdl.on('line', (line) => {
+        if (line.includes('rs')){
+          fileWatcher.close();
+          launchSubprocess();
+        }
+      })
+    } else {
+      console.log("> Waiting for changes to restart...");
+    }
+
+    cp.kill('SIGKILL')
+  });
+}
+
+launchSubprocess();
