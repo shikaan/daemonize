@@ -37,7 +37,7 @@ function launchSubprocess() {
 
   // Clear previous listeners
   process.stdin.removeAllListeners("keypress");
-  fileWatcher.close();
+  fileWatcher && fileWatcher.close();
 
   // Launch process
   const subprocess = fork(filename, rest, { silent: false });
@@ -45,13 +45,14 @@ function launchSubprocess() {
   // Watches for file changes and debounces the callback
   const debouncedListener = debounce((event, filename) => {
     if (event === "change" && filename) {
+      subprocess.kill("SIGKILL");
       launchSubprocess();
     }
   }, FILE_WATCH_INTERVAL);
   fileWatcher = watch(FILE_WATCH_FOLDER, debouncedListener);
 
   // Handle subprocess exits
-  subprocess.on("exit", code => {
+  subprocess.on("exit", (code, signal) => {
     if (code === 0) {
       console.log("> Clean exit");
       console.log("> Enter 'rs' to restart");
@@ -62,7 +63,7 @@ function launchSubprocess() {
           launchSubprocess();
         }
       });
-    } else {
+    } else if (signal !== 'SIGKILL') {
       console.log("> Waiting for changes to restart...");
     }
 
