@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 const { fork } = require("child_process");
 const { createInterface } = require("readline");

@@ -1,6 +1,6 @@
 {
   "name": "damien",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Daemonize Node application with child processes",
   "bin": "./bin/damien",
   "scripts": {
@@ -12,6 +12,10 @@
     "node",
     "deamon"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shikaan/damien"
+  },
   "author": "Manuel Spagnolo <spagnolo.manu@gmail.com>",
   "license": "MIT",
   "devDependencies": {
