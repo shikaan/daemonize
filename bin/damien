@@ -2,7 +2,7 @@
 
 const { fork } = require("child_process");
 const { createInterface } = require("readline");
-const { watch } = require("fs");
+const watch = require("node-watch");
 
 const { debounce } = require("../lib/debounce");
 
@@ -44,12 +44,12 @@ function launchSubprocess() {
 
   // Watches for file changes and debounces the callback
   const debouncedListener = debounce((event, filename) => {
-    if (event === "change" && filename) {
+    if (event === "update" && filename) {
       subprocess.kill("SIGKILL");
       launchSubprocess();
     }
   }, FILE_WATCH_INTERVAL);
-  fileWatcher = watch(FILE_WATCH_FOLDER, debouncedListener);
+  fileWatcher = watch(FILE_WATCH_FOLDER, {recursive: true}, debouncedListener);
 
   // Handle subprocess exits
   subprocess.on("exit", (code, signal) => {

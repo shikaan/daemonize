@@ -6,8 +6,9 @@ Running Node applications as a deamon by means of child processes
 
 ## Why?
 
-* :closed_lock_with_key: secure and dependency free;
+* :closed_lock_with_key: secure and almost dependency free;
 * :hatching_chick: tiny and understandable codebase;
+* :kiss: keep it simple, stupid;
 
 ## Installation
 

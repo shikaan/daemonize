@@ -1,6 +1,6 @@
 {
   "name": "damien",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Daemonize Node application with child processes",
   "bin": "./bin/damien",
   "scripts": {
@@ -25,5 +25,8 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1"
+  },
+  "dependencies": {
+    "node-watch": "^0.6.3"
   }
 }
