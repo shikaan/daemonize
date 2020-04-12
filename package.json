@@ -1,6 +1,6 @@
 {
   "name": "damien",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Daemonize Node application with child processes",
   "bin": "./bin/damien",
   "scripts": {
