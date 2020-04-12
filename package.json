@@ -5,7 +5,8 @@
   "bin": "./bin/damien",
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "test": "titef -e test.js ./lib"
   },
   "keywords": [
     "watch",
@@ -24,7 +25,8 @@
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-standard": "^4.0.1",
+    "titef": "^2.3.2"
   },
   "dependencies": {
     "node-watch": "^0.6.3"
