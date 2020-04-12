@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const { name, version = 'dev' } = require('../package')
 const { launchSubprocess } = require('../lib/launch-subprocess')
-const { getOption, buildOptionsTable, removeOptionFromArgv } = require('../lib/cli')
+const { buildOptionsTable, parseArgv } = require('../lib/cli')
 
 const ALLOWED_OPTIONS = [
   {
@@ -30,15 +30,14 @@ const ALLOWED_OPTIONS = [
   }
 ]
 
-const argv = [...process.argv]
-const [hasHelp, hasVersion, watch, delay] = ALLOWED_OPTIONS.map(option => getOption(option, argv))
+const result = parseArgv(process.argv.slice(2), ALLOWED_OPTIONS)
 
-if (hasVersion) {
+if (result.version) {
   console.log(version)
   process.exit(0)
 }
 
-if (hasHelp) {
+if (result.help) {
   console.log(`
 Usage: ${name} [OPTIONS] [script.js]
 
@@ -49,13 +48,9 @@ ${buildOptionsTable(ALLOWED_OPTIONS)}
   process.exit(0)
 }
 
-const [_node, _daemonize, ...rest] = process.argv
-const [script, ...args] = rest.reverse()
-
-let argsss = args.reverse()
-
-ALLOWED_OPTIONS.forEach(opt => {
-  argsss = removeOptionFromArgv(opt, argsss)
+launchSubprocess({
+  script: result.$$script,
+  watch: result.watch,
+  delay: result.delay,
+  args: result.$$remaining
 })
-
-launchSubprocess({ script, watch, delay, args: argsss })
