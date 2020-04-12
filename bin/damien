@@ -1,74 +1,61 @@
 #!/usr/bin/env node
+const { name, version = 'dev' } = require('../package')
+const { launchSubprocess } = require('../lib/launch-subprocess')
+const { getOption, buildOptionsTable, removeOptionFromArgv } = require('../lib/cli')
 
-const { fork } = require("child_process");
-const { createInterface } = require("readline");
-const watch = require("node-watch");
+const ALLOWED_OPTIONS = [
+  {
+    name: 'help',
+    alias: 'h',
+    description: 'Show help and exit',
+    defaultValue: false
+  },
+  {
+    name: 'version',
+    alias: 'v',
+    description: 'Show version and exit',
+    defaultValue: false
+  },
+  {
+    name: 'watch',
+    alias: 'w',
+    description: 'Watch directory <path> for file changes',
+    defaultValue: process.cwd()
+  },
+  {
+    name: 'delay',
+    alias: 'd',
+    description: 'Debounce restart for <n> milliseconds',
+    defaultValue: 2000
+  }
+]
 
-const { debounce } = require("../lib/debounce");
+const argv = [...process.argv]
+const [hasHelp, hasVersion, watch, delay] = ALLOWED_OPTIONS.map(option => getOption(option, argv))
 
-const FILE_WATCH_INTERVAL = 2000
-const FILE_WATCH_FOLDER = process.cwd()
-
-const terminal = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false
-});
-
-const hasHelp = process.argv.find(i => ["-h", "--help"].includes(i));
+if (hasVersion) {
+  console.log(version)
+  process.exit(0)
+}
 
 if (hasHelp) {
-  console.log(
-    `
-    Usage: daemonize [NODE_JS_FILE]
-    Relaunches NODE_JS_FILE on file changes.
-  `.trim()
-  );
-  process.exit(0);
+  console.log(`
+Usage: ${name} [OPTIONS] [script.js]
+
+Relaunches script.js on file changes.
+
+${buildOptionsTable(ALLOWED_OPTIONS)}
+`)
+  process.exit(0)
 }
 
-const [_node, _daemonize, filename, ...rest] = process.argv;
+const [_node, _daemonize, ...rest] = process.argv
+const [script, ...args] = rest.reverse()
 
-let fileWatcher;
+let argsss = args.reverse()
 
-function launchSubprocess() {
-  // Clear console
-  process.stdout.write("\033c");
+ALLOWED_OPTIONS.forEach(opt => {
+  argsss = removeOptionFromArgv(opt, argsss)
+})
 
-  // Clear previous listeners
-  process.stdin.removeAllListeners("keypress");
-  fileWatcher && fileWatcher.close();
-
-  // Launch process
-  const subprocess = fork(filename, rest, { silent: false });
-
-  // Watches for file changes and debounces the callback
-  const debouncedListener = debounce((event, filename) => {
-    if (event === "update" && filename) {
-      subprocess.kill("SIGKILL");
-      launchSubprocess();
-    }
-  }, FILE_WATCH_INTERVAL);
-  fileWatcher = watch(FILE_WATCH_FOLDER, {recursive: true}, debouncedListener);
-
-  // Handle subprocess exits
-  subprocess.on("exit", (code, signal) => {
-    if (code === 0) {
-      console.log("> Clean exit");
-      console.log("> Enter 'rs' to restart");
-
-      terminal.removeAllListeners("line");
-      terminal.on("line", line => {
-        if (line.includes("rs")) {
-          launchSubprocess();
-        }
-      });
-    } else if (signal !== 'SIGKILL') {
-      console.log("> Waiting for changes to restart...");
-    }
-
-    subprocess.kill("SIGKILL");
-  });
-}
-
-launchSubprocess();
+launchSubprocess({ script, watch, delay, args: argsss })
