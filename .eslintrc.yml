@@ -7,6 +7,8 @@ extends:
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
+  suite: readonly
+  test: readonly
 parserOptions:
   ecmaVersion: 2018
 rules: {}
